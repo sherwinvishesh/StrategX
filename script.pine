@@ -1,0 +1,47 @@
+//@version=4
+strategy("G-Channel & EMA Strategy with ATR SL/TP", shorttitle="G-EMA-ATR Strategy", overlay=true, pyramiding=5)
+
+// G-Channel settings, modified length to 5
+length = input(5, title="G-Channel Length")
+src = close
+
+a = 0.0
+b = 0.0
+a := max(src, nz(a[1])) - nz(a[1] - b[1]) / length
+b := min(src, nz(b[1])) + nz(a[1] - b[1]) / length
+avg = avg(a, b)
+
+crossup = b[1] < close[1] and b > close
+crossdn = a[1] > close[1] and a < close
+
+// EMA settings, modified length to 200
+emaLength = input(200, title="EMA Length")
+ema = ema(close, emaLength)
+
+// ATR settings for SL and TP
+atrLength = input(14, title="ATR Length")
+atrMultiplierSL = input(2, title="ATR Multiplier for SL")
+atrMultiplierTP = input(4, title="ATR Multiplier for TP")
+atr = atr(atrLength)
+
+// Define buy and sell conditions
+buyCondition = crossup and close < ema
+sellCondition = crossdn and close > ema
+
+// Calculate SL and TP levels
+longSL = close - atrMultiplierSL * atr
+longTP = close + atrMultiplierTP * atr
+
+// Strategy execution
+if (buyCondition)
+    strategy.entry("Buy", strategy.long)
+    strategy.exit("Take Profit / Stop Loss", "Buy", stop=longSL, limit=longTP)
+
+// Plotting with updated transparency handling
+plot(a, "Upper", color=color.new(color.red, 50))
+plot(b, "Lower", color=color.new(color.green, 50))
+plot(ema, "EMA", color=color.new(color.orange, 0))
+
+// Plot buy and sell signals
+plotshape(series=buyCondition, title="Buy Signal", location=location.belowbar, color=color.new(color.green, 0), style=shape.labelup, size=size.small, text="BUY")
+plotshape(series=sellCondition, title="Sell Signal", location=location.abovebar, color=color.new(color.red, 0), style=shape.labeldown, size=size.small, text="SELL")
