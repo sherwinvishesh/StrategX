@@ -1,0 +1,45 @@
+body {
+    font-family: 'Lato', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+input[type=text], input[type=date], input[type=submit] {
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+input[type=submit] {
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+}
+
+h3 {
+    text-align: center;
+}
+
+footer {
+    text-align: center;
+    padding: 50px;
+    background-color: white; /* Dark background */
+    color: black; /* Light text for contrast */
+    font-size: 1rem;
+    position: relative; /* Makes the footer always visible at the bottom */
+    left: 0;
+    bottom: 10;
+    width: 100%;
+  }
