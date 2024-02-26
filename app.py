@@ -1,43 +1,21 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template, Response
 import yfinance as yf
 import pandas as pd
-import numpy as np
+from datetime import date
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
-import matplotlib
-matplotlib.use('Agg')  # Use a non-GUI backend
-import matplotlib.pyplot as plt
+from statsmodels.tsa.arima.model import ARIMA
+import plotly.graph_objs as go
+from plotly.io import to_html
+import numpy as np  # Ensure this is included
+
 
 app = Flask(__name__)
-
-HTML_FORM = '''
-<!DOCTYPE html>
-<html>
-<head>
-    <title>StrategX</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <h2>Enter Stock Information</h2>
-    <form method="post">
-        <label for="ticker">Ticker Symbol:</label><br>
-        <input type="text" id="ticker" name="ticker" required><br>
-        <label for="start">Start Date:</label><br>
-        <input type="date" id="start" name="start_date" required><br>
-        <label for="end">End Date:</label><br>
-        <input type="date" id="end" name="end_date" required><br><br>
-        <input type="submit" value="Submit">
-    </form>
-    <footer>Made with ❤️ by Sherwin</footer>
-</body>
-</html>
-'''
-
-def fetch_stock_data(ticker, start_date, end_date):
-    data = yf.download(ticker, start=start_date, end=end_date)
-    return data
+app.config['PROJECT_NAME'] = 'StrategX'
+forecast_csv = None  # Global variable to hold the forecast CSV data
 
 # Calculate G-Channel
 def calculate_g_channel(data, length=5):
@@ -139,29 +117,64 @@ def plot_strategy(data, ticker):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    global forecast_csv  # Declare global to modify the global variable
+
     if request.method == 'POST':
         ticker = request.form['ticker']
         start_date = request.form['start_date']
-        end_date = request.form['end_date']
+        end_date = date.today().strftime('%Y-%m-%d')
 
-        # Check if the start date is before the end date
         if pd.to_datetime(start_date) >= pd.to_datetime(end_date):
-            return "Error: The start date must be before the end date. Please go back and enter a valid date range."
+            return "Error: Start date must be before the end date."
 
-
-        data = fetch_stock_data(ticker, start_date, end_date)
+        data = yf.download(ticker, start=start_date, end=end_date)
         if data.empty:
-            return "Error: No data available for the given date range. Please try a different range."
-        
+            return "Error: No data available for the given date range."
+
+        # Technical analysis and plot
         data = calculate_g_channel(data)
         data = calculate_ema(data)
+        data = calculate_ema_ribbon(data, [8, 14, 20, 26, 32, 38, 44, 50, 60])
+        data = calculate_knn(data)
         data = calculate_atr(data)
         data = calculate_indicators(data)
-        
-        image = plot_strategy(data, ticker)
-        return f'<img src="data:image/png;base64,{image}"><br><footer>Made with ❤️ by Sherwin</footer>'
+        image_base64 = plot_strategy(data, ticker)
+
+        # Time series data plot
+        fig1 = go.Figure()
+        fig1.add_trace(go.Scatter(x=data.index, y=data["Open"], name="Stock Open"))
+        fig1.add_trace(go.Scatter(x=data.index, y=data["Close"], name="Stock Close"))
+        fig1.layout.update(title_text="Time Series Data", xaxis_rangeslider_visible=True)
+        graph_html_1 = to_html(fig1, full_html=False)
+
+        # Forecasting
+        df_train = data[['Close']]
+        model = ARIMA(df_train, order=(5,1,0))
+        model_fit = model.fit()
+        forecast = model_fit.forecast(steps=365)  # Forecasting for the next year
+
+        future_dates = pd.date_range(start=data.index[-1], periods=366, freq='D')[1:]
+        fig2 = go.Figure()
+        fig2.add_trace(go.Scatter(x=future_dates, y=forecast, name='Forecast'))
+        fig2.layout.update(title_text="Forecast Data", xaxis_title="Date", yaxis_title="Price")
+        graph_html_2 = to_html(fig2, full_html=False)
+
+        forecast_csv = forecast.to_csv()  # Store the forecast CSV data for download
+
+        return render_template("index.html", graph_html_1=graph_html_1, graph_html_2=graph_html_2, image_base64=image_base64)
     else:
-        return render_template_string(HTML_FORM)
+        return render_template("index.html", graph_html_1=None, graph_html_2=None, image_base64=None)
+
+
+@app.route('/download_forecast')
+def download_forecast():
+    if forecast_csv is None:
+        return "No forecast data available to download."
+
+    return Response(
+        forecast_csv,
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=forecast.csv"})
 
 if __name__ == '__main__':
     app.run(debug=True)
