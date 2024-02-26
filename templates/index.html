@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>StrategX</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1>StrategX - Stock Analysis and Prediction App</h1>
+    <form method="post">
+        <label for="ticker">Ticker Symbol:</label><br>
+        <input type="text" id="ticker" name="ticker" required><br>
+        <label for="start_date">Start Date:</label><br>
+        <input type="date" id="start_date" name="start_date" required><br>
+        <input type="submit" value="Submit">
+    </form>
+    {% if graph_html_1 %}
+        <h2>Time Series Data</h2>
+        <div>{{ graph_html_1|safe }}</div>
+    {% endif %}
+    {% if image_base64 %}
+        <h2>Technical Analysis Chart</h2>
+        <!-- Display the PNG image -->
+        <img src="data:image/png;base64,{{ image_base64 }}" alt="Technical Analysis Chart">
+    {% endif %}
+    {% if graph_html_2 %}
+        <h2>Forecast Data</h2>
+        <div>{{ graph_html_2|safe }}</div>
+        <button onclick="location.href='/download_forecast'">Download Forecast CSV</button>
+    {% endif %}
+    <footer>Made with ❤️ by Sherwin</footer>
+</body>
+</html>
