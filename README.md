@@ -62,7 +62,7 @@ To run StrategX on your local machine, you need Python 3.6+ installed. Follow th
 
 
 
-# Usage
+## Usage
 
 After running the application, access it at `http://127.0.0.1:5000/`:
 
