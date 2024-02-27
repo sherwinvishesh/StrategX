@@ -155,6 +155,7 @@ The information provided by StrategX is for general informational purposes only.
 Under no circumstance shall we have any liability to you for any loss or damage of any kind incurred as a result of the use of the site or reliance on any information provided on the site. Your use of the site and your reliance on any information on the site is solely at your own risk.
 
 The StrategX application is not a financial advisor, and the content provided is not intended to be a substitute for professional financial advice. Always seek the advice of a qualified financial advisor with any questions you may have regarding financial decisions and investments.
+
 ---
 
 Made with ❤️ by Sherwin
