@@ -34,7 +34,7 @@ To run StrategX on your local machine, you need Python 3.6+ installed. Follow th
     ```
 3. Install the required Python packages.
     ```bash
-    pip3 install pandas numpy matplotlib yfinance flask base64 plotly 
+    pip3 install flask yfinance pandas matplotlib statsmodels plotly numpy
     ```
     `If you are getting any errors while installing the above`
     Then you have to create a virtual environment and run this program, here are the steps:
