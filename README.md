@@ -137,7 +137,7 @@ If you encounter any issues or have any questions, please submit an issue on the
 
 ## License
 
-StrategX is open source and available under the [MIT License](LICENSE).
+StrategX is open source and available under the [Apache-2.0 license](LICENSE).
 
 ## Acknowledgments
 
