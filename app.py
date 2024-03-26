@@ -121,11 +121,18 @@ def index():
 
     if request.method == 'POST':
         ticker = request.form['ticker']
-        start_date = request.form['start_date']
+        # start_date = request.form['start_date']
         end_date = date.today().strftime('%Y-%m-%d')
 
-        if pd.to_datetime(start_date) >= pd.to_datetime(end_date):
-            return "Error: Start date must be before the end date."
+        # if pd.to_datetime(start_date) >= pd.to_datetime(end_date):
+        #     return "Error: Start date must be before the end date."
+
+        ticker_obj = yf.Ticker(ticker)
+        history = ticker_obj.history(period="max")  # Fetches the maximum history
+        if history.empty:
+            return "Error: No data available for this ticker."
+        
+        start_date = history.index[0].strftime('%Y-%m-%d') 
 
         data = yf.download(ticker, start=start_date, end=end_date)
         if data.empty:
@@ -151,9 +158,9 @@ def index():
         df_train = data[['Close']]
         model = ARIMA(df_train, order=(5,1,0))
         model_fit = model.fit()
-        forecast = model_fit.forecast(steps=365)  # Forecasting for the next year
+        forecast = model_fit.forecast(steps=7)  # Forecasting for the next week
 
-        future_dates = pd.date_range(start=data.index[-1], periods=366, freq='D')[1:]
+        future_dates = pd.date_range(start=data.index[-1] + pd.Timedelta(days=1), periods=7, freq='D')
         fig2 = go.Figure()
         fig2.add_trace(go.Scatter(x=future_dates, y=forecast, name='Forecast'))
         fig2.layout.update(title_text="Forecast Data", xaxis_title="Date", yaxis_title="Price")
