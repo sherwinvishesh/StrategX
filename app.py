@@ -184,6 +184,4 @@ def download_forecast():
         headers={"Content-disposition": "attachment; filename=forecast.csv"})
 
 if __name__ == '__main__':
-    app.run(debug=False,host='0.0.0.0')
-    #For local hosting, comment remove the above line and un-comment the below line
-    #app.run(debug=True)
+     app.run(debug=True)
