@@ -10,8 +10,6 @@
     <form method="post">
         <label for="ticker">Ticker Symbol:</label><br>
         <input type="text" id="ticker" name="ticker" required><br>
-        <label for="start_date">Start Date:</label><br>
-        <input type="date" id="start_date" name="start_date" required><br>
         <input type="submit" value="Submit">
     </form>
     {% if graph_html_1 %}
@@ -26,6 +24,9 @@
     {% if graph_html_2 %}
         <h2>Forecast Data</h2>
         <div>{{ graph_html_2|safe }}</div>
+        <div class="warning-message">
+            <p><strong>WARNING:</strong> This forecast uses the ARIMA model for its predictions. It may be inaccurate in many instances, as it is based on analytical predictions using previous trends to forecast new trends. Please make investment decisions carefully and at your own risk.</p>
+        </div>
         <button onclick="location.href='/download_forecast'">Download Forecast CSV</button>
     {% endif %}
     <footer>Made with ❤️ by Sherwin</footer>
