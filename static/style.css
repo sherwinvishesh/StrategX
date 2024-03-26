@@ -42,6 +42,21 @@ input[type="submit"]:hover, button:hover {
     background-color: #004494;
 }
 
+.warning-message {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #ffdddd;
+    border-left: 6px solid #f44336;
+    color: #333;
+}
+
+.warning-message p {
+    margin: 0;
+    padding: 0;
+}
+
+
+
 footer {
     color: #777;
 }
